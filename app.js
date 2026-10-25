@@ -1,5 +1,6 @@
 /**
  * Elegant Photographic Mountain Weather App Logic - Local Computer Assets Engine
+ * Architecture Scope: Open-Meteo High-Availability API Implementation
  */
 
 const appState = {
@@ -14,31 +15,73 @@ const appState = {
  */
 const weatherThemesConfig = {
   sunny: {
-    imagePath: "./images/sunny.jpg",
+    imagePath: "./images/sunny.png",
     mountainColorClass: "text-amber-950/40",
     icon: "fa6-solid:circle"
   },
   rainy: {
-    imagePath: "./images/rainy.jpg",
+    imagePath: "./images/rainy.png",
     mountainColorClass: "text-indigo-950/50",
     icon: "fa6-solid:cloud-showers-heavy"
   },
   cloudy: {
-    imagePath: "./images/cloudy.jpg",
+    imagePath: "./images/cloudy.png",
     mountainColorClass: "text-slate-900/50",
     icon: "fa6-solid:cloud"
   },
   snowy: {
-    imagePath: "./images/snowy.jpg",
+    imagePath: "./images/snowy.png",
     mountainColorClass: "text-blue-950/40",
     icon: "fa6-solid:snowflake"
   },
   default: {
-    imagePath: "./images/default.jpg",
+    imagePath: "./images/tower.png",
     mountainColorClass: "text-slate-950/40",
     icon: "fa6-solid:circle"
   }
 };
+
+/**
+ * Open-Meteo WMO Weather Code Interpreter Dictionary
+ * Utilizes JavaScript Switch statements to route numeric tracking codes cleanly
+ */
+function interpretWmoCode(code) {
+  switch (code) {
+    case 0:
+    case 1:
+      return "Sunny";
+    case 2:
+      return "Partly Cloudy";
+    case 3:
+      return "Cloudy";
+    case 45:
+    case 48:
+      return "Mist";
+    case 51:
+    case 53:
+    case 55:
+    case 61:
+    case 63:
+    case 65:
+    case 80:
+    case 81:
+    case 82:
+      return "Rain";
+    case 71:
+    case 73:
+    case 75:
+    case 77:
+    case 85:
+    case 86:
+      return "Snow";
+    case 95:
+    case 96:
+    case 97:
+      return "Thunderstorm";
+    default:
+      return "Cloudy";
+  }
+}
 
 function getThemeKey(conditionText) {
   const normText = conditionText.toLowerCase();
@@ -51,6 +94,14 @@ function getThemeKey(conditionText) {
   return 'default';
 }
 
+/**
+ * ✅ FIXED: Placed at the top hemisphere of the codebase to prevent hoisting errors
+ */
+function assignWeatherSymbol(conditionText) {
+  const activeKey = getThemeKey(conditionText);
+  return weatherThemesConfig[activeKey].icon;
+}
+
 function applyThematicInterfaceStyles(conditionText) {
   const cardElement = document.getElementById('weather-card');
   const mountainGraphics = document.getElementById('mountain-element');
@@ -61,14 +112,10 @@ function applyThematicInterfaceStyles(conditionText) {
   // Inject local custom paths cleanly into standard inline style rules
   cardElement.style.backgroundImage = `url('${activeTheme.imagePath}')`;
   mountainGraphics.className = `mountain-bg ${activeTheme.mountainColorClass}`;
+
+  // Clean wildcard regex replacement sits safely inside the styling loop context block
+  cardElement.className = cardElement.className.replace(/bg-gradient\S+|from-\S+|to-\S+|bg-\[\S+\]/g, '').trim();
 }
-
-// Change line 66 in your app.js from this:
-cardElement.className = cardElement.className.replace(/bg-\[\S+\]/g, '').trim();
-
-// To this cleaner wildcard replacement:
-cardElement.className = cardElement.className.replace(/bg-gradient\S+|from-\S+|to-\S+|bg-\[\S+\]/g, '').trim();
-
 
 function evaluateScaleMetric(celsiusRawVal, appendUnitSymbol = true) {
   const cleanInteger = parseInt(celsiusRawVal, 10);
@@ -84,8 +131,14 @@ function transformToDayName(dateString) {
   });
 }
 
+/**
+ * Primary Core Asynchronous Processing Request Layer Pipeline Engine Routine
+ */
 async function triggerWeatherSyncFetch(locationTarget) {
-  const apiEndpointUrl = `https://wttr.in{encodeURIComponent(locationTarget)}?format=j1`;
+  const latitude = 51.0447;
+  const longitude = -114.0719;
+  
+  const apiEndpointUrl = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=America%2FEdmonton`;
   const DOMErrorBox = document.getElementById('error-message');
   
   try {
@@ -96,7 +149,7 @@ async function triggerWeatherSyncFetch(locationTarget) {
     appState.rawPayload = await responseStream.json();
     executeDOMWidgetRender();
   } catch (err) {
-    console.error(err);
+    console.error("API error tracing:", err);
     DOMErrorBox.classList.remove('hidden');
     document.getElementById('location-heading').innerText = 'Data Offline';
   }
@@ -106,37 +159,44 @@ function executeDOMWidgetRender() {
   const dataEngine = appState.rawPayload;
   if (!dataEngine) return;
 
-  const areaInformationNode = dataEngine.nearest_area;
-  document.getElementById('location-heading').innerText = `${areaInformationNode.areaName.value}, ${areaInformationNode.region.value}`;
+  // 1. Assign Local City Strings Anchor Nodes
+  document.getElementById('location-heading').innerText = "Calgary, Alberta";
 
-  const activeMetricsNow = dataEngine.current_condition;
-  const currentAtmosphereText = activeMetricsNow.weatherDesc.value;
+  // 2. Process Current Conditions Data Core Properties
+  const currentConditionText = interpretWmoCode(dataEngine.current.weather_code);
+  applyThematicInterfaceStyles(currentConditionText);
   
-  applyThematicInterfaceStyles(currentAtmosphereText);
-  
-  document.getElementById('current-condition').innerText = currentAtmosphereText;
-  document.getElementById('current-temp').innerText = evaluateScaleMetric(activeMetricsNow.temp_C);
+  document.getElementById('current-condition').innerText = currentConditionText;
+  document.getElementById('current-temp').innerText = evaluateScaleMetric(dataEngine.current.temperature_2m);
   
   const iconTargetNodeContainer = document.getElementById('current-icon-container');
-  iconTargetNodeContainer.innerHTML = `<iconify-icon icon="${assignWeatherSymbol(currentAtmosphereText)}"></iconify-icon>`;
+  iconTargetNodeContainer.innerHTML = `<iconify-icon icon="${assignWeatherSymbol(currentConditionText)}"></iconify-icon>`;
   
   const mainTodayCardItem = document.getElementById('weather-card');
   mainTodayCardItem.classList.remove('opacity-0', 'scale-95');
 
+  // 3. Process 3-Day Layout Matrix Tracks using required array methods (.filter and .map)
   const DOMGridRootContainer = document.getElementById('forecast-grid');
   DOMGridRootContainer.innerHTML = '';
 
-  const structuralThreeDaySegment = dataEngine.weather.filter((_, calendarIndex) => calendarIndex < 3);
+  const dailyTimeline = dataEngine.daily.time; 
 
-  const generatedDOMCardCollection = structuralThreeDaySegment.map((dayItemInstance) => {
-    const specificDayWeatherText = dayItemInstance.hourly.weatherDesc.value; 
-    const dynamicHTMLCardNode = document.createElement('div');
+  // Filter downward systematically to explicitly lock exactly 3 tracking day fields
+  const structuralThreeDaySegment = dailyTimeline.filter((_, calendarIndex) => calendarIndex < 3);
+
+  // Transform dataset arrays securely using .map blueprints arrays mutations
+  const generatedDOMCardCollection = structuralThreeDaySegment.map((dateString, runtimeIndex) => {
+    const dayWmoCode = dataEngine.daily.weather_code[runtimeIndex];
+    const specificDayWeatherText = interpretWmoCode(dayWmoCode);
     
+    const maxTempC = dataEngine.daily.temperature_2m_max[runtimeIndex];
+
+    const dynamicHTMLCardNode = document.createElement('div');
     dynamicHTMLCardNode.className = "flex justify-between items-center text-sm font-semibold text-white/95 py-1.5 drop-shadow";
     dynamicHTMLCardNode.innerHTML = `
-      <span class="w-1/3 text-left tracking-wide">${transformToDayName(dayItemInstance.date)}</span>
+      <span class="w-1/3 text-left tracking-wide">${transformToDayName(dateString)}</span>
       <span class="w-1/3 text-center capitalize text-xs tracking-wider text-white/80 font-normal">${specificDayWeatherText}</span>
-      <span class="w-1/3 text-right tracking-tighter">${evaluateScaleMetric(dayItemInstance.maxtempC)}</span>
+      <span class="w-1/3 text-right tracking-tighter">${evaluateScaleMetric(maxTempC)}</span>
     `;
 
     return dynamicHTMLCardNode;
