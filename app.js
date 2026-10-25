@@ -1,5 +1,5 @@
 /**
- * Elegant Photographic Mountain Weather App Logic - Local Computer Assets Engine
+ * Photographic Weather App Logic - Local Computer Assets Engine
  * Architecture Scope: Open-Meteo High-Availability API Implementation
  */
 
@@ -13,31 +13,31 @@ const weatherThemesConfig = {
   sunny: {
     imagePath: "./images/sunny.png",  
     icon: "ep:sunny",                    
-    mountainColorClass: "text-amber-950/40",
+    towerColorClass: "text-amber-950/40",
     textLabel: "Sunny"
   },
   rainy: {
     imagePath: "./images/rainy.png",
     icon: "famicons:rainy-outline",         
-    mountainColorClass: "text-indigo-950/50",
+    towerColorClass: "text-indigo-950/50",
     textLabel: "Rain"
   },
   cloudy: {
     imagePath: "./images/cloudy.png",
     icon: "carbon:mostly-cloudy",                        
-    mountainColorClass: "text-slate-900/50",
+    towerColorClass: "text-slate-900/50",
     textLabel: "Cloudy"
   },
   snowy: {
     imagePath: "./images/snowy.png",
     icon: "material-symbols-light:weather-snowy-outline",                         
-    mountainColorClass: "text-blue-950/40",
+    towerColorClass: "text-blue-950/40",
     textLabel: "Snow"
   },
   default: {
     imagePath: "./images/tower.png",
     icon: "akar-icons:cloud",                    
-    mountainColorClass: "text-slate-950/40",
+    towerColorClass: "text-slate-950/40",
     textLabel: "Cloudy"
   }
 };
@@ -103,14 +103,14 @@ function assignWeatherSymbol(conditionText) {
 
 function applyThematicInterfaceStyles(conditionText) {
   const cardElement = document.getElementById('weather-card');
-  const mountainGraphics = document.getElementById('mountain-element');
+  const towerGraphics = document.getElementById('tower-element');
   
   const activeKey = getThemeKey(conditionText);
   const activeTheme = weatherThemesConfig[activeKey];
   
   // Inject local custom paths cleanly into standard inline style rules
   cardElement.style.backgroundImage = `url('${activeTheme.imagePath}')`;
-  mountainGraphics.className = `mountain-bg ${activeTheme.mountainColorClass}`;
+  towerGraphics.className = `tower-bg ${activeTheme.towerColorClass}`;
 
   // Clean wildcard regex replacement sits safely inside the styling loop context block
   cardElement.className = cardElement.className.replace(/bg-gradient\S+|from-\S+|to-\S+|bg-\[\S+\]/g, '').trim();

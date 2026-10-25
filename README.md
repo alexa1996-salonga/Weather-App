@@ -6,6 +6,7 @@
 • HTML5 Structure: Construct semantic HTML5 markup.
 • Styling: Design a modern interface utilizing Tailwind CSS.
 • API Integration: Integrate the public Open-Meteo API for reliable weather data retrieval.
+
 Note: While wttr.in remains active, this project uses the Open-Meteo API to better handle customizable JSON payloads for a structured multi-day widget layout.
 
 ## Attribution Disclaimer

@@ -4,11 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>3-Day Weather App</title>
-  <!-- Tailwind CSS CDN -->
   <link rel="stylesheet" href="output.css">
-  <!-- Iconify Framework CDN -->
+  <script src="https://iconify.design"></script>
+
   <style>
-    .mountain-bg {
+    .tower-bg {
       position: absolute;
       bottom: 0;
       left: 0;
@@ -38,8 +38,8 @@
     <!-- Dark Glass tint overlay -->
     <div class="absolute inset-0 bg-black/30 backdrop-blur-[0.5px] z-1"></div>
 
-    <!-- Dynamic Mountain Graphics Element Track Background -->
-    <div id="mountain-element" class="mountain-bg text-slate-950"></div>
+    <!-- Background -->
+    <div id="tower-element" class="tower-bg text-slate-950"></div>
 
     <!-- Top Column: Primary Temperature & Status Focus -->
     <div class="flex flex-col items-center text-center mt-6 relative z-10">
@@ -60,7 +60,6 @@
     </div>
 
   </div>
-    <script src="https://iconify.design"></script>
 
   <script src="app.js"></script>
 </body>
