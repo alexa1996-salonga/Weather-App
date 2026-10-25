@@ -166,9 +166,13 @@ function executeDOMWidgetRender() {
   document.getElementById('current-temp').innerText = evaluateScaleMetric(dataEngine.current.temperature_2m);
   
 const iconTargetNodeContainer = document.getElementById('current-icon-container');
-iconTargetNodeContainer.innerHTML = `<iconify-icon icon="${assignWeatherSymbol(currentConditionText)}" class="inline-block w-12 h-12 text-[48px] text-white"></iconify-icon>`;
+iconTargetNodeContainer.innerHTML = `
+<iconify-icon 
+    icon="${assignWeatherSymbol(currentConditionText)}"
+    class="text-[100px] text-white">
+  </iconify-icon>
+`;
 
-  
   const mainTodayCardItem = document.getElementById('weather-card');
   mainTodayCardItem.classList.remove('opacity-0', 'scale-95');
 
