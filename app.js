@@ -63,10 +63,12 @@ function applyThematicInterfaceStyles(conditionText) {
   mountainGraphics.className = `mountain-bg ${activeTheme.mountainColorClass}`;
 }
 
-function assignWeatherSymbol(conditionText) {
-  const activeKey = getThemeKey(conditionText);
-  return weatherThemesConfig[activeKey].icon;
-}
+// Change line 66 in your app.js from this:
+cardElement.className = cardElement.className.replace(/bg-\[\S+\]/g, '').trim();
+
+// To this cleaner wildcard replacement:
+cardElement.className = cardElement.className.replace(/bg-gradient\S+|from-\S+|to-\S+|bg-\[\S+\]/g, '').trim();
+
 
 function evaluateScaleMetric(celsiusRawVal, appendUnitSymbol = true) {
   const cleanInteger = parseInt(celsiusRawVal, 10);
