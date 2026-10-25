@@ -7,7 +7,6 @@
   <!-- Tailwind CSS CDN -->
   <link rel="stylesheet" href="output.css">
   <!-- Iconify Framework CDN -->
-  <script src="https://iconify.design"></script>
   <style>
     .mountain-bg {
       position: absolute;
@@ -32,11 +31,11 @@
     </button>
   </div>
 
-  <!-- Primary Dynamic Interface Card Window Element -->
-<div id="weather-card" class="w-full max-w-md aspect-3/4 rounded-[40px] shadow-2xl relative overflow-hidden flex flex-col justify-between p-8 md:p-10 transition-all duration-700 opacity-0 transform scale-95 bg-cover bg-center">
+  <!-- Card Window Element -->
+    <div id="weather-card" class="w-full max-w-md aspect-3/4 rounded-[20px] shadow-2xl relative overflow-hidden flex flex-col justify-between p-8 md:p-10 transition-all duration-700 opacity-0 transform scale-95 bg-cover bg-center">
 
     
-    <!-- Dark Glass tint overlay to protect typography readability -->
+    <!-- Dark Glass tint overlay -->
     <div class="absolute inset-0 bg-black/30 backdrop-blur-[0.5px] z-1"></div>
 
     <!-- Dynamic Mountain Graphics Element Track Background -->
@@ -58,12 +57,11 @@
 
     <!-- Bottom Row: 3-Day Forecast Strip Container -->
     <div id="forecast-grid" class="flex flex-col gap-3 w-full border-t border-white/20 pt-6 relative z-10 drop-shadow-md">
-      <!-- Generated via app.js -->
     </div>
 
   </div>
+    <script src="https://iconify.design"></script>
 
-  <!-- App Data Binding Core Logic Link -->
   <script src="app.js"></script>
 </body>
 </html>

@@ -9,37 +9,39 @@ const appState = {
   queryLocation: 'Calgary'
 };
 
-/**
- * 🏠 LOCAL IMAGE THEME CONFIGURATION DICTIONARY MAP
- * Points directly to the images folder sitting inside your project directory.
- */
 const weatherThemesConfig = {
   sunny: {
-    imagePath: "./images/sunny.png",
+    imagePath: "./images/sunny.png",  
+    icon: "ep:sunny",                    
     mountainColorClass: "text-amber-950/40",
-    icon: "fa6-solid:circle"
+    textLabel: "Sunny"
   },
   rainy: {
     imagePath: "./images/rainy.png",
+    icon: "famicons:rainy-outline",         
     mountainColorClass: "text-indigo-950/50",
-    icon: "fa6-solid:cloud-showers-heavy"
+    textLabel: "Rain"
   },
   cloudy: {
     imagePath: "./images/cloudy.png",
+    icon: "carbon:mostly-cloudy",                        
     mountainColorClass: "text-slate-900/50",
-    icon: "fa6-solid:cloud"
+    textLabel: "Cloudy"
   },
   snowy: {
     imagePath: "./images/snowy.png",
+    icon: "material-symbols-light:weather-snowy-outline",                         
     mountainColorClass: "text-blue-950/40",
-    icon: "fa6-solid:snowflake"
+    textLabel: "Snow"
   },
   default: {
     imagePath: "./images/tower.png",
+    icon: "akar-icons:cloud",                    
     mountainColorClass: "text-slate-950/40",
-    icon: "fa6-solid:circle"
+    textLabel: "Cloudy"
   }
 };
+
 
 /**
  * Open-Meteo WMO Weather Code Interpreter Dictionary
@@ -94,9 +96,6 @@ function getThemeKey(conditionText) {
   return 'default';
 }
 
-/**
- * ✅ FIXED: Placed at the top hemisphere of the codebase to prevent hoisting errors
- */
 function assignWeatherSymbol(conditionText) {
   const activeKey = getThemeKey(conditionText);
   return weatherThemesConfig[activeKey].icon;
@@ -131,9 +130,6 @@ function transformToDayName(dateString) {
   });
 }
 
-/**
- * Primary Core Asynchronous Processing Request Layer Pipeline Engine Routine
- */
 async function triggerWeatherSyncFetch(locationTarget) {
   const latitude = 51.0447;
   const longitude = -114.0719;
@@ -169,8 +165,9 @@ function executeDOMWidgetRender() {
   document.getElementById('current-condition').innerText = currentConditionText;
   document.getElementById('current-temp').innerText = evaluateScaleMetric(dataEngine.current.temperature_2m);
   
-  const iconTargetNodeContainer = document.getElementById('current-icon-container');
-  iconTargetNodeContainer.innerHTML = `<iconify-icon icon="${assignWeatherSymbol(currentConditionText)}"></iconify-icon>`;
+const iconTargetNodeContainer = document.getElementById('current-icon-container');
+iconTargetNodeContainer.innerHTML = `<iconify-icon icon="${assignWeatherSymbol(currentConditionText)}" class="inline-block w-12 h-12 text-[48px] text-white"></iconify-icon>`;
+
   
   const mainTodayCardItem = document.getElementById('weather-card');
   mainTodayCardItem.classList.remove('opacity-0', 'scale-95');
