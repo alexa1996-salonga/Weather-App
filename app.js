@@ -9,7 +9,7 @@ const appState = {
   queryLocation: 'Calgary'
 };
 
-const weatherThemesConfig = {
+const weatherBackground = {
   sunny: {
     imagePath: "./images/sunny.png",  
     icon: "ep:sunny",                    
@@ -98,7 +98,7 @@ function getThemeKey(conditionText) {
 
 function assignWeatherSymbol(conditionText) {
   const activeKey = getThemeKey(conditionText);
-  return weatherThemesConfig[activeKey].icon;
+  return weatherBackground[activeKey].icon;
 }
 
 function applyThematicInterfaceStyles(conditionText) {
@@ -106,7 +106,7 @@ function applyThematicInterfaceStyles(conditionText) {
   const towerGraphics = document.getElementById('tower-element');
   
   const activeKey = getThemeKey(conditionText);
-  const activeTheme = weatherThemesConfig[activeKey];
+  const activeTheme = weatherBackground[activeKey];
   
   // Inject local custom paths cleanly into standard inline style rules
   cardElement.style.backgroundImage = `url('${activeTheme.imagePath}')`;
