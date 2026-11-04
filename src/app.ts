@@ -124,6 +124,13 @@ function transformToDayName(dateString: string): string {
     timeZone: 'America/Edmonton'
   });
 }
+function evaluateScaleMetric(celsius: number): string {
+  const temperature = appState.isCelsiusSystem
+    ? Math.round(celsius)
+    : Math.round((celsius * 9) / 5 + 32);
+
+  return `${temperature}°`;
+}
 function executeDOMWidgetRender() {
   const dataEngine = appState.rawPayload;
   if (!dataEngine) return;
