@@ -117,7 +117,13 @@ function applyThematicInterfaceStyles(conditionText: string) {
     towerGraphics.className = `tower-bg ${activeTheme.towerColorClass}`;
   }
 }
-
+function transformToDayName(dateString: string): string {
+  const date = new Date(`${dateString}T00:00:00`);
+  return date.toLocaleDateString('en-CA', {
+    weekday: 'long',
+    timeZone: 'America/Edmonton'
+  });
+}
 function executeDOMWidgetRender() {
   const dataEngine = appState.rawPayload;
   if (!dataEngine) return;
