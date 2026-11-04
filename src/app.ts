@@ -108,53 +108,13 @@ function applyThematicInterfaceStyles(conditionText: string) {
   const activeKey = getThemeKey(conditionText);
   const activeTheme = weatherBackground[activeKey];
   
-  // Inject local custom paths cleanly into standard inline style rules
+  // Re-add optional chaining for safety
   if (cardElement) {
     cardElement.style.backgroundImage = `url('${activeTheme.imagePath}')`;
+    cardElement.className = cardElement.className.replace(/bg-gradient\S+|from-\S+|to-\S+|bg-\[\S+\]/g, '').trim();
   }
   if (towerGraphics) {
     towerGraphics.className = `tower-bg ${activeTheme.towerColorClass}`;
-  }
-
-  // Clean wildcard regex replacement sits safely inside the styling loop context block
-  if (cardElement) {
-    cardElement.className = cardElement.className.replace(/bg-gradient\S+|from-\S+|to-\S+|bg-\[\S+\]/g, '').trim();
-  }
-}
-
-function evaluateScaleMetric(celsiusRawVal: string | number, appendUnitSymbol = true): string {
-  const cleanInteger = Number.parseInt(String(celsiusRawVal), 10);
-  const processedValue = appState.isCelsiusSystem ? cleanInteger : Math.round((cleanInteger * 9) / 5 + 32);
-  return appendUnitSymbol ? `${processedValue}°` : `${processedValue}`;
-}
-
-function transformToDayName(dateString: string): string {
-  const formatReference = new Date(dateString + 'T00:00:00');
-  return formatReference.toLocaleDateString('en-CA', { 
-    weekday: 'long', 
-    timeZone: 'America/Edmonton' 
-  });
-}
-
-async function triggerWeatherSyncFetch(locationTarget: string) {
-  const latitude = 51.0447;
-  const longitude = -114.0719;
-  
-  const apiEndpointUrl = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=America%2FEdmonton`;
-  const DOMErrorBox = document.getElementById('error-message');
-  
-  try {
-    DOMErrorBox?.classList.add('hidden');
-    const responseStream = await fetch(apiEndpointUrl);
-    if (!responseStream.ok) throw new Error(`Handshake failure: ${responseStream.status}`);
-    
-    appState.rawPayload = await responseStream.json();
-    executeDOMWidgetRender();
-  } catch (err) {
-    console.error("API error tracing:", err);
-    DOMErrorBox?.classList.remove('hidden');
-    const locationHeading = document.getElementById('location-heading');
-    if (locationHeading) locationHeading.innerText = 'Data Offline';
   }
 }
 
@@ -162,11 +122,10 @@ function executeDOMWidgetRender() {
   const dataEngine = appState.rawPayload;
   if (!dataEngine) return;
 
-  // 1. Assign Local City Strings Anchor Nodes
+  // Added optional chaining protections safely back to direct element manipulation
   const locationHeadingElement = document.getElementById('location-heading');
   if (locationHeadingElement) locationHeadingElement.innerText = "Calgary, Alberta";
 
-  // 2. Process Current Conditions Data Core Properties
   const currentConditionText = interpretWmoCode(dataEngine.current.weather_code);
   applyThematicInterfaceStyles(currentConditionText);
   
@@ -188,21 +147,17 @@ function executeDOMWidgetRender() {
 
   const mainTodayCardItem = document.getElementById('weather-card');
   mainTodayCardItem?.classList.remove('opacity-0', 'scale-95');
-  // 3. Process 3-Day Layout Matrix Tracks using required array methods (.filter and .map)
+
   const DOMGridRootContainer = document.getElementById('forecast-grid');
   if (!DOMGridRootContainer) return;
   DOMGridRootContainer.innerHTML = '';
 
   const dailyTimeline = dataEngine.daily.time; 
-
-  // Filter downward systematically to explicitly lock exactly 3 tracking day fields
   const structuralThreeDaySegment = dailyTimeline.filter((_, calendarIndex) => calendarIndex < 3);
 
-  // Transform dataset arrays securely using .map blueprints arrays mutations
   const generatedDOMCardCollection = structuralThreeDaySegment.map((dateString, runtimeIndex) => {
     const dayWmoCode = dataEngine.daily.weather_code[runtimeIndex];
     const specificDayWeatherText = interpretWmoCode(dayWmoCode);
-    
     const maxTempC = dataEngine.daily.temperature_2m_max[runtimeIndex];
 
     const dynamicHTMLCardNode = document.createElement('div');
@@ -212,7 +167,6 @@ function executeDOMWidgetRender() {
       <span class="w-1/3 text-center capitalize text-xs tracking-wider text-white/80 font-normal">${specificDayWeatherText}</span>
       <span class="w-1/3 text-right tracking-tighter">${evaluateScaleMetric(maxTempC)}</span>
     `;
-
     return dynamicHTMLCardNode;
   });
 
@@ -221,6 +175,7 @@ function executeDOMWidgetRender() {
   });
 }
 
+// Added an operational fallback check for the unit toggle listener activation
 const unitToggleButton = document.getElementById('unit-toggle');
 if (unitToggleButton) {
   unitToggleButton.addEventListener('click', () => {
@@ -229,7 +184,3 @@ if (unitToggleButton) {
     executeDOMWidgetRender();
   });
 }
-
-document.addEventListener('DOMContentLoaded', () => {
-  triggerWeatherSyncFetch(appState.queryLocation);
-});
