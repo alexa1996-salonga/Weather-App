@@ -47,7 +47,7 @@ const weatherBackground = {
  * Open-Meteo WMO Weather Code Interpreter Dictionary
  * Utilizes JavaScript Switch statements to route numeric tracking codes cleanly
  */
-function interpretWmoCode(code) {
+function interpretWmoCode(code:any): string {
   switch (code) {
     case 0:
     case 1:
@@ -85,7 +85,7 @@ function interpretWmoCode(code) {
   }
 }
 
-function getThemeKey(conditionText) {
+function getThemeKey(conditionText: string): string {
   const normText = conditionText.toLowerCase();
   
   if (normText.includes('sunny') || normText.includes('clear')) return 'sunny';
@@ -96,12 +96,12 @@ function getThemeKey(conditionText) {
   return 'default';
 }
 
-function assignWeatherSymbol(conditionText) {
+function assignWeatherSymbol(conditionText: string) {
   const activeKey = getThemeKey(conditionText);
   return weatherBackground[activeKey].icon;
 }
 
-function applyThematicInterfaceStyles(conditionText) {
+function applyThematicInterfaceStyles(conditionText: string) {
   const cardElement = document.getElementById('weather-card');
   const towerGraphics = document.getElementById('tower-element');
   
@@ -116,13 +116,13 @@ function applyThematicInterfaceStyles(conditionText) {
   cardElement.className = cardElement.className.replace(/bg-gradient\S+|from-\S+|to-\S+|bg-\[\S+\]/g, '').trim();
 }
 
-function evaluateScaleMetric(celsiusRawVal, appendUnitSymbol = true) {
+function evaluateScaleMetric(celsiusRawVal: string, appendUnitSymbol = true) {
   const cleanInteger = parseInt(celsiusRawVal, 10);
   const processedValue = appState.isCelsiusSystem ? cleanInteger : Math.round((cleanInteger * 9) / 5 + 32);
   return appendUnitSymbol ? `${processedValue}°` : processedValue;
 }
 
-function transformToDayName(dateString) {
+function transformToDayName(dateString: string): string {
   const formatReference = new Date(dateString + 'T00:00:00');
   return formatReference.toLocaleDateString('en-CA', { 
     weekday: 'long', 
@@ -130,7 +130,7 @@ function transformToDayName(dateString) {
   });
 }
 
-async function triggerWeatherSyncFetch(locationTarget) {
+async function triggerWeatherSyncFetch(locationTarget: string) {
   const latitude = 51.0447;
   const longitude = -114.0719;
   
@@ -138,7 +138,7 @@ async function triggerWeatherSyncFetch(locationTarget) {
   const DOMErrorBox = document.getElementById('error-message');
   
   try {
-    DOMErrorBox.classList.add('hidden');
+    DOMErrorBox?.classList.add('hidden');
     const responseStream = await fetch(apiEndpointUrl);
     if (!responseStream.ok) throw new Error(`Handshake failure: ${responseStream.status}`);
     
@@ -146,8 +146,9 @@ async function triggerWeatherSyncFetch(locationTarget) {
     executeDOMWidgetRender();
   } catch (err) {
     console.error("API error tracing:", err);
-    DOMErrorBox.classList.remove('hidden');
-    document.getElementById('location-heading').innerText = 'Data Offline';
+    DOMErrorBox?.classList.remove('hidden');
+    const locationHeading = document.getElementById('location-heading');
+    if (locationHeading) locationHeading.innerText = 'Data Offline';
   }
 }
 
