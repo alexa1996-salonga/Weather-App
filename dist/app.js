@@ -101,7 +101,6 @@ function applyThematicInterfaceStyles(conditionText) {
     const towerGraphics = document.getElementById('tower-element');
     const activeKey = getThemeKey(conditionText);
     const activeTheme = weatherBackground[activeKey];
-    // Re-add optional chaining for safety
     if (cardElement) {
         cardElement.style.backgroundImage = `url('${activeTheme.imagePath}')`;
         cardElement.className = cardElement.className.replace(/bg-gradient\S+|from-\S+|to-\S+|bg-\[\S+\]/g, '').trim();
@@ -123,11 +122,32 @@ function evaluateScaleMetric(celsius) {
         : Math.round((celsius * 9) / 5 + 32);
     return `${temperature}°`;
 }
+// PLACED HERE: Clean, type-safe API synchronization handler setup 
+async function triggerWeatherSyncFetch(locationTarget) {
+    const latitude = 51.0447;
+    const longitude = -114.0719;
+    const apiEndpointUrl = `https://open-meteo.com{latitude}&longitude=${longitude}&current=temperature_2m,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=America%2FEdmonton`;
+    const DOMErrorBox = document.getElementById('error-message');
+    try {
+        DOMErrorBox?.classList.add('hidden');
+        const responseStream = await fetch(apiEndpointUrl);
+        if (!responseStream.ok)
+            throw new Error(`Handshake failure: ${responseStream.status}`);
+        appState.rawPayload = await responseStream.json();
+        executeDOMWidgetRender();
+    }
+    catch (err) {
+        console.error("API error tracing:", err);
+        DOMErrorBox?.classList.remove('hidden');
+        const locationHeading = document.getElementById('location-heading');
+        if (locationHeading)
+            locationHeading.innerText = 'Data Offline';
+    }
+}
 function executeDOMWidgetRender() {
     const dataEngine = appState.rawPayload;
     if (!dataEngine)
         return;
-    // Added optional chaining protections safely back to direct element manipulation
     const locationHeadingElement = document.getElementById('location-heading');
     if (locationHeadingElement)
         locationHeadingElement.innerText = "Calgary, Alberta";
@@ -173,7 +193,6 @@ function executeDOMWidgetRender() {
         DOMGridRootContainer.appendChild(compiledDOMNode);
     });
 }
-// Added an operational fallback check for the unit toggle listener activation
 const unitToggleButton = document.getElementById('unit-toggle');
 if (unitToggleButton) {
     unitToggleButton.addEventListener('click', () => {
@@ -182,5 +201,9 @@ if (unitToggleButton) {
         executeDOMWidgetRender();
     });
 }
+// Added baseline lifecycle initialization trigger explicitly back onto the bottom stack trace
+document.addEventListener('DOMContentLoaded', () => {
+    triggerWeatherSyncFetch(appState.queryLocation);
+});
 export {};
 //# sourceMappingURL=app.js.map
