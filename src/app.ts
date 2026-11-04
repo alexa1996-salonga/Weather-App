@@ -197,3 +197,25 @@ if (unitToggleButton) {
     executeDOMWidgetRender();
   });
 }
+async function triggerWeatherSyncFetch(locationTarget: string) {
+  const latitude = 51.0447;
+  const longitude = -114.0719;
+  
+  // Ensure the assignment operator (=) is used and the URL structure is valid
+  const apiEndpointUrl = `https://open-meteo.com{latitude}&longitude=${longitude}&current=temperature_2m,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=America%2FEdmonton`;
+  const DOMErrorBox = document.getElementById('error-message');
+  
+  try {
+    DOMErrorBox?.classList.add('hidden');
+    const responseStream = await fetch(apiEndpointUrl);
+    if (!responseStream.ok) throw new Error(`Handshake failure: ${responseStream.status}`);
+    
+    appState.rawPayload = await responseStream.json();
+    executeDOMWidgetRender();
+  } catch (err) {
+    console.error("API error tracing:", err);
+    DOMErrorBox?.classList.remove('hidden');
+    const locationHeading = document.getElementById('location-heading');
+    if (locationHeading) locationHeading.innerText = 'Data Offline';
+  }
+}
