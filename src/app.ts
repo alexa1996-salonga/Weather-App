@@ -4,7 +4,7 @@
  */
 
 const appState = {
-  rawPayload: null,
+  rawPayload: null as any,
   isCelsiusSystem: true,
   queryLocation: 'Calgary'
 };
@@ -102,24 +102,30 @@ function assignWeatherSymbol(conditionText: string) {
 }
 
 function applyThematicInterfaceStyles(conditionText: string) {
-  const cardElement = document.getElementById('weather-card');
-  const towerGraphics = document.getElementById('tower-element');
+  const cardElement: any = document.getElementById('weather-card');
+  const towerGraphics: any = document.getElementById('tower-element');
   
   const activeKey = getThemeKey(conditionText);
   const activeTheme = weatherBackground[activeKey];
   
   // Inject local custom paths cleanly into standard inline style rules
-  cardElement.style.backgroundImage = `url('${activeTheme.imagePath}')`;
-  towerGraphics.className = `tower-bg ${activeTheme.towerColorClass}`;
+  if (cardElement) {
+    cardElement.style.backgroundImage = `url('${activeTheme.imagePath}')`;
+  }
+  if (towerGraphics) {
+    towerGraphics.className = `tower-bg ${activeTheme.towerColorClass}`;
+  }
 
   // Clean wildcard regex replacement sits safely inside the styling loop context block
-  cardElement.className = cardElement.className.replace(/bg-gradient\S+|from-\S+|to-\S+|bg-\[\S+\]/g, '').trim();
+  if (cardElement) {
+    cardElement.className = cardElement.className.replace(/bg-gradient\S+|from-\S+|to-\S+|bg-\[\S+\]/g, '').trim();
+  }
 }
 
-function evaluateScaleMetric(celsiusRawVal: string, appendUnitSymbol = true) {
-  const cleanInteger = parseInt(celsiusRawVal, 10);
+function evaluateScaleMetric(celsiusRawVal: string | number, appendUnitSymbol = true): string {
+  const cleanInteger = Number.parseInt(String(celsiusRawVal), 10);
   const processedValue = appState.isCelsiusSystem ? cleanInteger : Math.round((cleanInteger * 9) / 5 + 32);
-  return appendUnitSymbol ? `${processedValue}°` : processedValue;
+  return appendUnitSymbol ? `${processedValue}°` : `${processedValue}`;
 }
 
 function transformToDayName(dateString: string): string {
@@ -157,28 +163,34 @@ function executeDOMWidgetRender() {
   if (!dataEngine) return;
 
   // 1. Assign Local City Strings Anchor Nodes
-  document.getElementById('location-heading').innerText = "Calgary, Alberta";
+  const locationHeadingElement = document.getElementById('location-heading');
+  if (locationHeadingElement) locationHeadingElement.innerText = "Calgary, Alberta";
 
   // 2. Process Current Conditions Data Core Properties
   const currentConditionText = interpretWmoCode(dataEngine.current.weather_code);
   applyThematicInterfaceStyles(currentConditionText);
   
-  document.getElementById('current-condition').innerText = currentConditionText;
-  document.getElementById('current-temp').innerText = evaluateScaleMetric(dataEngine.current.temperature_2m);
+  const currentConditionElement = document.getElementById('current-condition');
+  if (currentConditionElement) currentConditionElement.innerText = currentConditionText;
+
+  const currentTempElement = document.getElementById('current-temp');
+  if (currentTempElement) currentTempElement.innerText = evaluateScaleMetric(dataEngine.current.temperature_2m);
   
-const iconTargetNodeContainer = document.getElementById('current-icon-container');
-iconTargetNodeContainer.innerHTML = `
-<iconify-icon 
-    icon="${assignWeatherSymbol(currentConditionText)}"
-    class="text-[100px] text-white">
-  </iconify-icon>
-`;
+  const iconTargetNodeContainer = document.getElementById('current-icon-container');
+  if (iconTargetNodeContainer) {
+    iconTargetNodeContainer.innerHTML = `
+      <iconify-icon 
+          icon="${assignWeatherSymbol(currentConditionText)}"
+          class="text-[100px] text-white">
+        </iconify-icon>
+    `;
+  }
 
   const mainTodayCardItem = document.getElementById('weather-card');
-  mainTodayCardItem.classList.remove('opacity-0', 'scale-95');
-
+  mainTodayCardItem?.classList.remove('opacity-0', 'scale-95');
   // 3. Process 3-Day Layout Matrix Tracks using required array methods (.filter and .map)
   const DOMGridRootContainer = document.getElementById('forecast-grid');
+  if (!DOMGridRootContainer) return;
   DOMGridRootContainer.innerHTML = '';
 
   const dailyTimeline = dataEngine.daily.time; 
@@ -209,11 +221,14 @@ iconTargetNodeContainer.innerHTML = `
   });
 }
 
-document.getElementById('unit-toggle').addEventListener('click', () => {
-  appState.isCelsiusSystem = !appState.isCelsiusSystem;
-  document.getElementById('unit-toggle').innerHTML = `<span>Switch to &deg;${appState.isCelsiusSystem ? 'F' : 'C'}</span>`;
-  executeDOMWidgetRender();
-});
+const unitToggleButton = document.getElementById('unit-toggle');
+if (unitToggleButton) {
+  unitToggleButton.addEventListener('click', () => {
+    appState.isCelsiusSystem = !appState.isCelsiusSystem;
+    unitToggleButton.innerHTML = `<span>Switch to &deg;${appState.isCelsiusSystem ? 'F' : 'C'}</span>`;
+    executeDOMWidgetRender();
+  });
+}
 
 document.addEventListener('DOMContentLoaded', () => {
   triggerWeatherSyncFetch(appState.queryLocation);
